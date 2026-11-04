@@ -231,11 +231,12 @@ class InferenceService:
                 np.float32,
             )
 
-        # 4. Compute heuristic surgical risk regions.
+        # 4. Atlas-based anatomical surgical risk mapping (Harvard-Oxford atlas).
         risk_regions = compute_risk_regions(
             tumor_mask=output.mask,
             volume_array=np.asarray(volume.array),
             spacing=volume.spacing,
+            affine=volume.affine,
         )
 
         wt_feature = next(

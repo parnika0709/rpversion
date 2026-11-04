@@ -1,6 +1,47 @@
 """Public API for the risk-mapping module."""
 
-from braintumor.risk.mapping import RiskRegion, compute_risk_regions
+from braintumor.risk.mapping import (
+    CANONICAL_FUNCTIONAL_REGIONS,
+    EXTENDED_FUNCTIONAL_REGIONS,
+    NO_TUMOR_TIER,
+    RISK_TIERS,
+    AtlasMappingError,
+    AtlasNotFoundError,
+    AtlasRegionDefinition,
+    HarvardOxfordAtlas,
+    MappingStatus,
+    RegistrationError,
+    RiskRegion,
+    RiskThresholds,
+    compute_region_metrics,
+    compute_risk_regions,
+    get_default_atlas,
+    resample_mask_to_atlas,
+    risk_tier_sensitivity,
+    thresholds_from_env,
+    validate_spatial_inputs,
+)
 from braintumor.risk.report import build_report_text
 
-__all__ = ["RiskRegion", "compute_risk_regions", "build_report_text"]
+__all__ = [
+    "RiskRegion",
+    "compute_risk_regions",
+    "compute_region_metrics",
+    "risk_tier_sensitivity",
+    "build_report_text",
+    "RiskThresholds",
+    "thresholds_from_env",
+    "NO_TUMOR_TIER",
+    "RISK_TIERS",
+    "MappingStatus",
+    "AtlasMappingError",
+    "AtlasNotFoundError",
+    "RegistrationError",
+    "HarvardOxfordAtlas",
+    "AtlasRegionDefinition",
+    "CANONICAL_FUNCTIONAL_REGIONS",
+    "EXTENDED_FUNCTIONAL_REGIONS",
+    "get_default_atlas",
+    "resample_mask_to_atlas",
+    "validate_spatial_inputs",
+]

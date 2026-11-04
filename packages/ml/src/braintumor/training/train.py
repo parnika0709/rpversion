@@ -8,7 +8,7 @@ NOTE: This is a scaffold — actual training is launched from
 
 from __future__ import annotations
 
-import randomGet-Content ..\..\packages\ml\src\braintumor\models\attention_unet_2d.py
+import random
 import time
 from dataclasses import dataclass
 from pathlib import Path

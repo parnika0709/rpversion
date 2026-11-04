@@ -185,12 +185,12 @@ class InferenceService:
             saliency_path = case_results_dir / "saliency.nii.gz"
             nib.save(nib.Nifti1Image(output.saliency.astype(np.float32), volume.affine), str(saliency_path))
 
-        # 4. Heuristic surgical risk mapping (whole-tumor region vs. approximate
-        #    functional regions — see braintumor.risk.mapping for the caveats).
+        # 4. Atlas-based anatomical surgical risk mapping (Harvard-Oxford atlas).
         risk_regions = compute_risk_regions(
             tumor_mask=mask,
             volume_array=np.asarray(volume.array),
             spacing=volume.spacing,
+            affine=volume.affine,
         )
         wt_feature = next((f for f in feature_bundle.features if f.label.value == "whole_tumor"), None)
         tumor_volume_mm3 = wt_feature.volume_mm3 if wt_feature else None

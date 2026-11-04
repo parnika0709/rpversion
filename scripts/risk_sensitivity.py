@@ -55,7 +55,7 @@ def main() -> None:
     if pred.shape != volume.shape[1:]:
         raise SystemExit(f"Mask {pred.shape} and T1ce {volume.shape[1:]} differ in shape.")
 
-    pred_metrics = compute_region_metrics(pred, volume, spacing)
+    pred_metrics = compute_region_metrics(pred, volume, spacing, affine=t1ce_img.affine)
     rows = risk_tier_sensitivity(pred_metrics)
 
     print(f"Predicted tumor voxels: {int(pred.sum()):,}")
@@ -83,7 +83,7 @@ def main() -> None:
         gt = _load_mask(args.gt)
         if gt.shape != pred.shape:
             raise SystemExit(f"Ground truth {gt.shape} and mask {pred.shape} differ in shape.")
-        gt_metrics = compute_region_metrics(gt, volume, spacing)
+        gt_metrics = compute_region_metrics(gt, volume, spacing, affine=t1ce_img.affine)
         default = RiskThresholds()
         agree = 0
         print("\nTier from prediction vs. ground truth (default thresholds):")
