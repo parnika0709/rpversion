@@ -1,0 +1,907 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroRisk Lens | AI Brain MRI Analysis</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #080d1a;
+  --panel: #111a2b;
+  --panel2: #162238;
+  --border: #263650;
+  --text: #edf4ff;
+  --muted: #899ab5;
+  --cyan: #36d9e8;
+  --blue: #638bff;
+  --purple: #a78bfa;
+  --green: #39d6a0;
+  --red: #ff657c;
+  --orange: #ffb45e;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+}
+
+button, input { font: inherit; }
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+  width: 245px;
+  background: #0d1525;
+  border-right: 1px solid var(--border);
+  padding: 28px 18px;
+  flex-shrink: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 45px;
+}
+
+.logo {
+  width: 43px;
+  height: 43px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  font-size: 23px;
+  background: linear-gradient(135deg, #1cbed1, #665cff);
+  box-shadow: 0 5px 25px #36d9e833;
+}
+
+.brand h2 {
+  font-family: Outfit, sans-serif;
+  font-size: 19px;
+  margin: 0;
+}
+
+.brand small {
+  color: var(--cyan);
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+.nav-label {
+  color: #637590;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  margin: 25px 12px 12px;
+}
+
+.nav-item {
+  padding: 13px 14px;
+  border-radius: 10px;
+  color: var(--muted);
+  margin-bottom: 7px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-item.active {
+  background: linear-gradient(90deg, #19384a, #192b45);
+  color: var(--cyan);
+  border: 1px solid #285267;
+}
+
+.nav-icon { font-size: 17px; }
+
+.sidebar-note {
+  margin-top: 65px;
+  padding: 15px;
+  background: #131f32;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* MAIN */
+
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: 32px 38px;
+  max-width: 1600px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  gap: 15px;
+}
+
+.topbar h1 {
+  font-family: Outfit, sans-serif;
+  font-size: 27px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.subtitle {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 7px;
+}
+
+.status-pill {
+  border: 1px solid #245c50;
+  background: #102c2b;
+  color: var(--green);
+  padding: 9px 14px;
+  border-radius: 30px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.status-dot {
+  display: inline-block;
+  height: 7px;
+  width: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  margin-right: 7px;
+}
+
+.welcome {
+  background:
+    radial-gradient(circle at 85% 20%, #4b4bff30, transparent 30%),
+    linear-gradient(110deg, #142b43, #17223e 70%, #20234c);
+  border: 1px solid #344767;
+  border-radius: 18px;
+  padding: 26px 29px;
+  margin-bottom: 25px;
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome h2 {
+  font-family: Outfit, sans-serif;
+  font-size: 22px;
+  margin: 0 0 9px;
+}
+
+.welcome p {
+  color: #b6c6df;
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.7;
+}
+
+.welcome-tag {
+  display: inline-block;
+  color: var(--cyan);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
+}
+
+/* CARDS */
+
+.section-heading {
+  font-family: Outfit, sans-serif;
+  font-size: 17px;
+  margin: 28px 0 15px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 17px;
+}
+
+.stat-card {
+  padding: 21px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  min-height: 125px;
+}
+
+.stat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.stat-icon {
+  height: 35px;
+  width: 35px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #21334d;
+  font-size: 17px;
+}
+
+.stat-value {
+  font-family: Outfit, sans-serif;
+  font-size: 25px;
+  font-weight: 600;
+  margin-top: 15px;
+}
+
+.stat-desc {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* UPLOAD */
+
+.upload-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 24px;
+  border-radius: 16px;
+}
+
+.upload-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.upload-header h3 {
+  font-family: Outfit, sans-serif;
+  margin: 0;
+  font-size: 17px;
+}
+
+.upload-header span {
+  color: var(--cyan);
+  font-size: 11px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 17px;
+}
+
+.field label {
+  display: block;
+  font-size: 12px;
+  color: #c6d4e9;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.field input[type="text"] {
+  width: 100%;
+  padding: 13px;
+  background: #0b1424;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: white;
+  outline: none;
+}
+
+.field input:focus {
+  border-color: var(--cyan);
+}
+
+.file-box {
+  border: 1px dashed #425c7e;
+  background: #0c1728;
+  padding: 15px;
+  border-radius: 10px;
+  min-height: 100px;
+  transition: .2s;
+}
+
+.file-box:focus-within {
+  border-color: var(--cyan);
+}
+
+.file-box input {
+  display: block;
+  width: 100%;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 10px;
+}
+
+.file-icon {
+  font-size: 19px;
+  margin-bottom: 5px;
+}
+
+.file-title {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.file-hint {
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+
+.action-row {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+
+.analyze-btn {
+  background: linear-gradient(100deg, #1bbdce, #6579ff);
+  color: #07111e;
+  border: 0;
+  border-radius: 9px;
+  padding: 13px 23px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 5px 20px #36d9e82b;
+}
+
+.analyze-btn:hover { filter: brightness(1.12); }
+
+.analyze-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.upload-hint {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* STATUS */
+
+#status {
+  display: none;
+  padding: 14px 17px;
+  border-radius: 10px;
+  margin-top: 18px;
+  background: #14243a;
+  border: 1px solid #344d6c;
+  color: var(--cyan);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+#status.error {
+  color: var(--red);
+  border-color: #663347;
+  background: #2c1826;
+}
+
+/* RESULTS */
+
+#result { display: none; }
+
+.result-banner {
+  margin-top: 28px;
+  padding: 17px 20px;
+  background: #102c2b;
+  border: 1px solid #285d51;
+  border-radius: 12px;
+  color: var(--green);
+  font-size: 13px;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 17px;
+  margin-top: 17px;
+}
+
+.result-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 22px;
+  border-radius: 14px;
+  min-width: 0;
+}
+
+.result-card h3 {
+  font-family: Outfit, sans-serif;
+  font-size: 15px;
+  margin: 0 0 17px;
+}
+
+.tumor-number {
+  color: var(--cyan);
+  font-family: Outfit, sans-serif;
+  font-size: 27px;
+  font-weight: 600;
+}
+
+.tumor-caption {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 5px;
+}
+
+.table-wrap { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 620px;
+}
+
+th {
+  text-align: left;
+  color: #91a4c0;
+  font-size: 10px;
+  letter-spacing: .5px;
+  padding: 13px 12px;
+  background: #17243a;
+}
+
+td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border);
+  color: #d8e3f3;
+}
+
+.tier {
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 5px 9px;
+  display: inline-block;
+}
+
+.tier-High { background: #49212d; color: #ff8296; }
+.tier-Moderate { background: #48341f; color: #ffc477; }
+.tier-Low { background: #173b34; color: #56e4b0; }
+
+.report-card {
+  margin-top: 17px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 23px;
+}
+
+.report-card h3 {
+  font-family: Outfit, sans-serif;
+  margin: 0 0 15px;
+}
+
+#report-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: #c0cee1;
+  font-size: 12px;
+  line-height: 1.9;
+  margin: 0;
+}
+
+.disclaimer {
+  border: 1px solid #55472e;
+  background: #292318;
+  color: #eacb91;
+  padding: 13px 16px;
+  border-radius: 10px;
+  font-size: 10px;
+  line-height: 1.7;
+  margin-top: 25px;
+}
+
+footer {
+  color: #62748f;
+  text-align: center;
+  font-size: 10px;
+  margin-top: 28px;
+  padding-bottom: 20px;
+}
+
+@media(max-width: 900px) {
+  .sidebar { width: 190px; }
+  .main { padding: 25px 20px; }
+}
+
+@media(max-width: 650px) {
+  .sidebar { display: none; }
+  .main { padding: 22px 15px; }
+  .stats { grid-template-columns: 1fr; }
+  .form-grid, .result-grid { grid-template-columns: 1fr; }
+  .topbar h1 { font-size: 22px; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div class="brand">
+    <div class="logo">ðŸ§ </div>
+    <div>
+      <h2>NeuroRisk Lens</h2>
+      <small>AI BRAIN ANALYTICS</small>
+    </div>
+  </div>
+
+  <div class="nav-label">WORKSPACE</div>
+  <div class="nav-item active"><span class="nav-icon">â–¦</span> Dashboard</div>
+  <div class="nav-item"><span class="nav-icon">â—‰</span> MRI Analysis</div>
+  <div class="nav-item"><span class="nav-icon">âŒ˜</span> Risk Mapping</div>
+
+  <div class="nav-label">INSIGHTS</div>
+  <div class="nav-item"><span class="nav-icon">â–¤</span> Reports</div>
+
+  <div class="sidebar-note">
+    <div style="color:var(--cyan);font-weight:700;margin-bottom:5px;">âœ¦ AI Research Platform</div>
+    Brain MRI tumour segmentation research prototype using BraTS 2021 annotated MRI data, with experimental anatomical-region analysis.
+  </div>
+</aside>
+
+<main class="main">
+
+  <header class="topbar">
+    <div>
+      <h1>Dashboard Overview</h1>
+      <div class="subtitle">Welcome to your brain MRI analysis workspace.</div>
+    </div>
+    <div class="status-pill"><span class="status-dot"></span> Research Prototype</div>
+  </header>
+
+  <section class="welcome">
+    <div class="welcome-tag">NEURORISK LENS / OVERVIEW</div>
+    <h2>Detect. Map. Quantify. Explain.</h2>
+    <p>An AI-powered research platform for brain tumor segmentation<br>
+    and anatomical risk assessment using MRI scans.</p>
+  </section>
+
+  <h2 class="section-heading">Analysis Overview</h2>
+
+  <section class="stats">
+    <div class="stat-card">
+      <div class="stat-top">
+        <span>Patient Cases</span>
+        <div class="stat-icon">â™™</div>
+      </div>
+      <div class="stat-value" id="case-stat">â€”</div>
+      <div class="stat-desc">Cases submitted for analysis</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-top">
+        <span>Tumor Segmentation</span>
+        <div class="stat-icon">â—ˆ</div>
+      </div>
+      <div class="stat-value" style="color:var(--cyan)">AI</div>
+      <div class="stat-desc">Multimodal MRI analysis</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-top">
+        <span>Risk Assessment</span>
+        <div class="stat-icon">âŒ</div>
+      </div>
+      <div class="stat-value" style="color:var(--purple)">3D</div>
+      <div class="stat-desc">Region overlap and distance analysis</div>
+    </div>
+  </section>
+
+  <h2 class="section-heading">New MRI Analysis</h2>
+
+  <section class="upload-panel">
+    <div class="upload-header">
+      <h3>Upload MRI Scans</h3>
+      <span>â— NEW ANALYSIS</span>
+    </div>
+
+    <form id="upload-form">
+      <div class="form-grid">
+
+        <div class="field">
+          <label for="case_name">Patient / Case Name</label>
+          <input type="text" id="case_name" required
+          placeholder="e.g. patient-001">
+        </div>
+
+        <div class="field">
+          <label>Supported Format</label>
+          <div style="padding:13px;background:#0b1424;border:1px solid var(--border);border-radius:9px;color:var(--muted);font-size:12px;">
+            NIfTI medical imaging Â· .nii / .nii.gz
+          </div>
+        </div>
+
+        <div class="file-box">
+          <div class="file-icon">ðŸ§ </div>
+          <div class="file-title">T1CE MRI Scan</div>
+          <div class="file-hint">Contrast-enhanced MRI</div>
+          <input type="file" id="t1ce_file" accept=".nii,.nii.gz" required>
+        </div>
+
+        <div class="file-box">
+          <div class="file-icon">ðŸ”¬</div>
+          <div class="file-title">T2 MRI Scan</div>
+          <div class="file-hint">T2-weighted MRI</div>
+          <input type="file" id="t2_file" accept=".nii,.nii.gz" required>
+        </div>
+
+        <div class="file-box">
+          <div class="file-icon">ðŸ©»</div>
+          <div class="file-title">FLAIR MRI Scan</div>
+          <div class="file-hint">Fluid-attenuated MRI</div>
+          <input type="file" id="flair_file" accept=".nii,.nii.gz" required>
+        </div>
+
+      </div>
+
+      <div class="action-row">
+        <button type="submit" class="analyze-btn" id="analyze-btn">
+          âœ¦ Upload & Analyze â†’
+        </button>
+        <span class="upload-hint">Upload all 3 MRI modalities to begin.</span>
+      </div>
+    </form>
+  </section>
+
+  <div id="status" role="status" aria-live="polite"></div>
+
+  <section id="result">
+
+    <div class="result-banner">
+      âœ“ Analysis response received
+    </div>
+
+    <h2 class="section-heading">Analysis Results</h2>
+
+    <div class="result-grid" style="display:none;">
+      <div class="result-card">
+        <h3>ðŸ§  Tumor Overview</h3>
+        <div class="tumor-number" id="tumor-volume">â€”</div>
+        <div class="tumor-caption">Whole tumor volume (mmÂ³)</div>
+        <p id="tumor-summary" style="font-size:11px;color:var(--muted);line-height:1.7;"></p>
+      </div>
+
+      <div class="result-card">
+        <h3>â—ˆ Risk Mapping Summary</h3>
+        <div class="tumor-number" id="risk-count">â€”</div>
+        <div class="tumor-caption">Risk regions returned by analysis</div>
+        <p style="font-size:11px;color:var(--muted);line-height:1.7;">
+          Based on the current prototype's region overlap and distance estimates.
+        </p>
+      </div>
+    </div>
+
+    <h2 class="section-heading" style="display:none;">Anatomical Risk Regions</h2>
+    <div class="result-card">
+      <div class="table-wrap" style="display:none;">
+        <table>
+          <thead>
+            <tr>
+              <th>REGION</th>
+              <th>FUNCTION</th>
+              <th>OVERLAP %</th>
+              <th>DISTANCE (MM)</th>
+              <th>RISK LEVEL</th>
+            </tr>
+          </thead>
+          <tbody id="risk-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="report-card" style="display:none;">
+      <h3>âœ¦ AI Analysis Report</h3>
+      <pre id="report-text"></pre>
+    </div>
+  </section>
+
+  <div class="disclaimer">
+    âš  RESEARCH / EDUCATIONAL PROTOTYPE â€” NOT A MEDICAL DEVICE.
+    Results are experimental and are not validated for clinical diagnosis,
+    treatment planning, or surgical decision-making. Anatomical region
+    locations and risk estimates are approximate and require professional review.
+  </div>
+
+  <footer>NEURORISK LENS Â· AI-POWERED BRAIN MRI RESEARCH PLATFORM</footer>
+
+</main>
+</div>
+
+<script>
+const API = "";
+
+const form = document.getElementById("upload-form");
+const statusEl = document.getElementById("status");
+const resultEl = document.getElementById("result");
+const analyzeBtn = document.getElementById("analyze-btn");
+
+let completedCases = 0;
+
+function setStatus(message, isError = false) {
+  statusEl.style.display = "block";
+  statusEl.textContent = message;
+  statusEl.classList.toggle("error", isError);
+}
+
+["t1ce_file", "t2_file", "flair_file"].forEach(id => {
+  document.getElementById(id).addEventListener("change", event => {
+    const file = event.target.files[0];
+    const hint = event.target.closest(".file-box").querySelector(".file-hint");
+    hint.textContent = file ? file.name : "No file selected";
+    hint.style.color = file ? "var(--cyan)" : "var(--muted)";
+  });
+});
+
+async function pollPrediction(caseId, attempts = 60) {
+  for (let i = 0; i < attempts; i++) {
+    const res = await fetch(`${API}/cases/${caseId}/prediction`);
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data) return data;
+    }
+
+    if (!res.ok && res.status !== 404) {
+      throw new Error("Unable to retrieve prediction: " + res.status);
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setStatus(`Running AI inference... (${i + 1}/${attempts})`);
+  }
+
+  throw new Error("Timed out waiting for prediction.");
+}
+
+function renderResult(prediction) {
+  const features = (prediction.features && prediction.features.features) || [];
+  const wt = features.find(f => f.label === "whole_tumor");
+
+  document.getElementById("tumor-summary").textContent = wt
+    ? `Whole tumor: ${Math.round(wt.volume_mm3).toLocaleString()} mmÂ³ Â· ${wt.voxel_count.toLocaleString()} voxels`
+    : "No whole tumor measurement was returned.";
+
+  document.getElementById("tumor-volume").textContent = wt
+    ? Math.round(wt.volume_mm3).toLocaleString()
+    : "â€”";
+
+  const regions = prediction.risk_regions || [];
+  document.getElementById("risk-count").textContent = regions.length;
+
+  const tbody = document.getElementById("risk-table-body");
+  tbody.replaceChildren();
+
+  regions.forEach(region => {
+    const tr = document.createElement("tr");
+
+    const values = [
+      region.region,
+      region.function,
+      `${region.overlap_pct}%`,
+      region.distance_mm === null ? "â€”" : region.distance_mm,
+    ];
+
+    values.forEach(value => {
+      const td = document.createElement("td");
+      td.textContent = value ?? "â€”";
+      tr.appendChild(td);
+    });
+
+    const riskCell = document.createElement("td");
+    const risk = document.createElement("span");
+    risk.className = `tier tier-${region.risk_tier}`;
+    risk.textContent = region.risk_tier || "Unknown";
+    riskCell.appendChild(risk);
+    tr.appendChild(riskCell);
+
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("report-text").textContent =
+    prediction.risk_report || "No report was returned.";
+
+document.querySelector(".result-grid").style.display = "grid";
+document.querySelector(".report-card").style.display = "block";
+
+  resultEl.style.display = "block";
+  resultEl.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+form.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  resultEl.style.display = "none";
+  analyzeBtn.disabled = true;
+  analyzeBtn.textContent = "Processing...";
+
+  const caseName = document.getElementById("case_name").value.trim();
+  const t1ce = document.getElementById("t1ce_file").files[0];
+  const t2 = document.getElementById("t2_file").files[0];
+  const flair = document.getElementById("flair_file").files[0];
+
+  if (!caseName || !t1ce || !t2 || !flair) {
+    setStatus("Please enter a case name and select all three MRI files.", true);
+    analyzeBtn.disabled = false;
+    analyzeBtn.textContent = "âœ¦ Upload & Analyze â†’";
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append("case_name", caseName);
+  fd.append("t1ce_file", t1ce);
+  fd.append("t2_file", t2);
+  fd.append("flair_file", flair);
+
+  try {
+    setStatus("Uploading MRI scans...");
+
+    const createRes = await fetch(`${API}/cases/`, {
+      method: "POST",
+      body: fd
+    });
+
+    if (!createRes.ok) {
+      throw new Error(await createRes.text());
+    }
+
+    const caseData = await createRes.json();
+
+    setStatus("MRI uploaded. Starting AI inference...");
+
+    const predictRes = await fetch(`${API}/cases/${caseData.id}/predict`, {
+      method: "POST"
+    });
+
+    if (!predictRes.ok) {
+      throw new Error(await predictRes.text());
+    }
+
+    const prediction = await pollPrediction(caseData.id);
+
+    completedCases++;
+    document.getElementById("case-stat").textContent = completedCases;
+
+    setStatus("Analysis completed successfully.");
+    renderResult(prediction);
+
+  } catch (error) {
+    setStatus("Error: " + error.message, true);
+  } finally {
+    analyzeBtn.disabled = false;
+    analyzeBtn.textContent = "âœ¦ Upload & Analyze â†’";
+  }
+});
+</script>
+</body>
+</html>
+
+
+
+
+
+

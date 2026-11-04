@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NeuroRisk Lens | Surgical Risk Mapping</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root {
+  --ink:#17243a;
+  --muted:#718096;
+  --line:#e4eaf2;
+  --bg:#f4f7fb;
+  --white:#fff;
+  --blue:#4169e1;
+  --cyan:#27b8c5;
+  --shadow:0 12px 34px rgba(29,48,79,.07);
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  font-size:14px;
+  line-height:1.5;
+}
+.app-shell { min-height:100vh; display:grid; grid-template-columns:236px minmax(0,1fr); }
+.sidebar {
+  background:linear-gradient(165deg,#142541,#0c172b);
+  color:#dce7fa;
+  padding:27px 18px;
+  display:flex;
+  flex-direction:column;
+  gap:34px;
+}
+.brand { display:flex; align-items:center; gap:11px; padding:0 8px; }
+.brand-mark {
+  width:39px; height:39px; border-radius:13px;
+  background:linear-gradient(135deg,#4e7bff,#27c3cb);
+  display:grid; place-items:center; color:white; font-size:20px;
+  font-weight:800; box-shadow:0 8px 20px #0b132e;
+}
+.brand-name { font-size:15px; font-weight:750; color:#fff; }
+.brand-sub { font-size:10px; color:#9eb1d1; letter-spacing:1.6px; text-transform:uppercase; }
+.nav-label { font-size:10px; letter-spacing:1.5px; color:#7f94b7; font-weight:700; padding:0 12px; margin-bottom:10px; }
+.nav-item { display:flex; align-items:center; gap:12px; color:#aebed8; padding:12px; border-radius:11px; margin:4px 0; font-size:13px; }
+.nav-item.active { background:linear-gradient(90deg,rgba(78,123,255,.24),rgba(78,123,255,.08)); color:#fff; border:1px solid rgba(122,157,255,.19); }
+.nav-icon { width:20px; text-align:center; font-size:16px; }
+.side-note { margin-top:auto; border:1px solid #2b3b58; background:rgba(255,255,255,.04); padding:14px; border-radius:13px; font-size:11px; color:#9fb0cb; }
+.side-note strong { display:block; color:#e7efff; font-size:12px; margin-bottom:5px; }
+main { min-width:0; padding:28px clamp(18px,3.4vw,48px) 42px; }
+.topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:29px; }
+.eyebrow { font-size:11px; text-transform:uppercase; letter-spacing:1.7px; color:#7d8ba2; font-weight:750; }
+.topbar h1 { font-size:25px; letter-spacing:-.7px; margin:4px 0 0; font-weight:760; }
+.profile { display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--line); padding:8px 12px; border-radius:12px; color:#53647d; font-size:12px; white-space:nowrap; }
+.profile-dot { width:8px; height:8px; background:#29b88a; border-radius:50%; box-shadow:0 0 0 4px #e3f8ef; }
+.hero {
+  position:relative; overflow:hidden;
+  background:linear-gradient(115deg,#1c3764,#284d91 54%,#327f9a);
+  border-radius:20px; padding:27px 30px; color:#fff;
+  margin-bottom:22px; box-shadow:var(--shadow);
+}
+.hero:after {
+  content:""; position:absolute; width:260px; height:260px;
+  border:1px solid rgba(255,255,255,.12); border-radius:50%;
+  right:4%; top:-145px;
+  box-shadow:0 0 0 26px rgba(255,255,255,.035),0 0 0 54px rgba(255,255,255,.025);
+}
+.hero-content { position:relative; z-index:1; max-width:680px; }
+.hero-kicker { color:#bfeef0; font-size:10px; letter-spacing:1.8px; font-weight:800; text-transform:uppercase; }
+.hero h2 { font-size:24px; line-height:1.2; letter-spacing:-.5px; margin:9px 0; }
+.hero p { color:#d9e7fb; max-width:590px; margin:0; font-size:13px; }
+.stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:15px; margin-bottom:23px; }
+.stat { background:#fff; border:1px solid var(--line); border-radius:15px; padding:17px 19px; display:flex; align-items:center; gap:13px; box-shadow:0 3px 10px rgba(29,48,79,.02); }
+.stat-icon { width:42px; height:42px; border-radius:13px; display:grid; place-items:center; font-size:19px; background:#edf3ff; color:#426be2; }
+.stat:nth-child(2) .stat-icon { background:#e7f9f7; color:#159a9b; }
+.stat:nth-child(3) .stat-icon { background:#fff4e5; color:#ce8730; }
+.stat-label { color:var(--muted); font-size:11px; font-weight:600; }
+.stat-value { font-size:15px; font-weight:750; margin-top:3px; }
+.section-heading { display:flex; justify-content:space-between; align-items:end; gap:14px; margin:27px 0 13px; }
+.section-heading h2 { font-size:17px; margin:0; }
+.section-heading p { margin:3px 0 0; color:var(--muted); font-size:12px; }
+.tag { border-radius:999px; padding:5px 10px; background:#e8efff; color:#3d61c8; font-size:10px; font-weight:750; white-space:nowrap; }
+.panel { background:#fff; border:1px solid var(--line); border-radius:17px; padding:22px; box-shadow:var(--shadow); }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:17px 20px; }
+.field.full { grid-column:1/-1; }
+label { display:block; margin:0 0 7px; font-size:12px; font-weight:700; color:#34445d; }
+.optional-note { font-weight:600; color:#8592a6; }
+input[type=text] { width:100%; border:1px solid #dce4ef; border-radius:10px; padding:12px 13px; font:inherit; color:var(--ink); outline:none; background:#fbfcfe; }
+input[type=text]:focus,input[type=file]:focus { border-color:#7291f6; box-shadow:0 0 0 3px #eaf0ff; }
+.file-input { width:100%; display:block; border:1px dashed #c8d4e7; background:#f8faff; border-radius:11px; padding:10px; color:#63728a; font-size:11px; min-width:0; }
+.file-input::file-selector-button { border:0; border-radius:7px; background:#e8efff; color:#3156bc; padding:8px 10px; font-size:11px; font-weight:700; margin-right:10px; cursor:pointer; }
+.upload-help { font-size:11px; color:#8592a6; margin-top:6px; }
+.form-footer { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top:21px; padding-top:18px; border-top:1px solid #edf0f5; }
+.form-footer small { color:#8491a4; font-size:11px; }
+.primary-btn { border:0; border-radius:10px; padding:12px 18px; background:linear-gradient(110deg,#4169e1,#3455c8); color:#fff; font-size:12px; font-weight:750; cursor:pointer; box-shadow:0 7px 15px rgba(65,105,225,.2); transition:transform .15s,box-shadow .15s; }
+.primary-btn:hover { transform:translateY(-1px); box-shadow:0 10px 20px rgba(65,105,225,.25); }
+.primary-btn:disabled { opacity:.65; cursor:wait; transform:none; }
+.btn-arrow { padding-left:9px; font-size:15px; }
+#status { display:none; margin-top:15px; padding:12px 15px; background:#eef4ff; border:1px solid #dce7ff; color:#3458b9; border-radius:10px; font-size:12px; overflow-wrap:anywhere; }
+#status:not(:empty) { display:block; }
+#result { display:none; margin-top:25px; }
+.result-summary { background:linear-gradient(110deg,#f0f7ff,#f4fbfc); border:1px solid #dfeaf7; border-radius:13px; padding:17px 19px; margin:12px 0 19px; }
+.result-summary .mini-label { color:#6f829d; text-transform:uppercase; letter-spacing:1.2px; font-size:10px; font-weight:800; }
+.result-summary p { margin:6px 0 0; font-size:15px; font-weight:700; }
+.result-summary p.dice-line { display:none; font-size:13px; color:#2f4a78; }
+.preview-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:12px 0 22px; }
+.preview-card { min-width:0; padding:14px; border:1px solid var(--line); border-radius:14px; background:#fff; box-shadow:0 5px 18px rgba(29,48,79,.04); }
+.preview-card h3 { margin:0 0 4px; font-size:13px; }
+.preview-card p { margin:0 0 10px; color:var(--muted); font-size:11px; }
+.preview-image-wrap { display:grid; place-items:center; min-height:180px; overflow:hidden; border:1px solid #e5ebf4; border-radius:10px; background:#101827; }
+.preview-image-wrap img { display:block; width:100%; height:230px; object-fit:contain; color:#d7e0ef; font-size:12px; }
+.table-wrap { overflow-x:auto; border:1px solid var(--line); border-radius:12px; margin-top:12px; }
+table { border-collapse:collapse; width:100%; font-size:12px; min-width:590px; }
+th,td { padding:13px 15px; text-align:left; border-bottom:1px solid #edf0f5; }
+th { background:#f7f9fc; color:#6f7d92; font-size:10px; text-transform:uppercase; letter-spacing:.8px; }
+tbody tr:last-child td { border-bottom:0; }
+tbody tr:hover { background:#fafcff; }
+.tier-High { color:#c33b52; font-weight:750; }
+.tier-Moderate { color:#b7791f; font-weight:750; }
+.tier-Low { color:#17856c; font-weight:750; }
+.tier-No-tumor-detected { color:#64748b; font-weight:750; }
+#report-text { white-space:pre-wrap; background:#f8faff; border:1px solid #e3eaf5; padding:17px; border-radius:12px; font-size:12px; line-height:1.75; color:#43536b; overflow-wrap:anywhere; margin-top:12px; }
+.disclaimer { display:flex; align-items:flex-start; gap:10px; background:#fff8e9; border:1px solid #f5e4b8; padding:13px 15px; border-radius:12px; font-size:11px; color:#85652b; margin-top:23px; }
+.disclaimer-icon { font-size:16px; line-height:1.3; }
+.footer { font-size:10px; color:#9aa5b5; text-align:center; margin-top:27px; }
+@media(max-width:850px) {
+  .app-shell { grid-template-columns:1fr; }
+  .sidebar { padding:15px 18px; gap:0; flex-direction:row; align-items:center; justify-content:space-between; }
+  .sidebar nav,.side-note { display:none; }
+  main { padding:22px 18px 35px; }
+  .brand-sub { display:none; }
+  .topbar h1 { font-size:21px; }
+  .hero { padding:23px; }
+  .stats { gap:9px; }
+  .stat { padding:13px; gap:9px; }
+  .stat-icon { width:35px; height:35px; }
+  .stat-value { font-size:12px; }
+}
+@media(max-width:560px) {
+  .topbar { align-items:flex-start; }
+  .profile { font-size:0; padding:10px; }
+  .profile-dot { width:9px; height:9px; }
+  .hero h2 { font-size:21px; }
+  .stats { grid-template-columns:1fr; }
+  .stat { padding:12px 15px; }
+  .form-grid { grid-template-columns:1fr; }
+  .field.full { grid-column:auto; }
+  .panel { padding:17px; }
+  .form-footer { align-items:flex-start; flex-direction:column; }
+  .primary-btn { width:100%; }
+  .section-heading { align-items:flex-start; }
+  .topbar h1 { font-size:19px; }
+  .preview-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">N</div>
+      <div>
+        <div class="brand-name">NeuroRisk Lens</div>
+        <div class="brand-sub">Clinical research UI</div>
+      </div>
+    </div>
+
+    <nav>
+      <div class="nav-label">WORKSPACE</div>
+      <div class="nav-item active"><span class="nav-icon">▦</span> Overview</div>
+      <div class="nav-item"><span class="nav-icon">◉</span> MRI Analysis</div>
+      <div class="nav-item"><span class="nav-icon">⌁</span> Risk Mapping</div>
+      <div class="nav-item"><span class="nav-icon">▤</span> Reports</div>
+    </nav>
+
+    <div class="side-note">
+      <strong>Research prototype</strong>
+      Designed to explore tumor segmentation and anatomical proximity mapping.
+      Not for clinical decision-making.
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">NEURORISK LENS / WORKSPACE</div>
+        <h1>Brain MRI Risk Dashboard</h1>
+      </div>
+      <div class="profile"><span class="profile-dot"></span> System ready</div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-kicker">AI-assisted research workflow</div>
+        <h2>See beyond the tumor mask.</h2>
+        <p>Explore tumor segmentation and map proximity to critical functional brain regions through a clear, structured analysis workflow.</p>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Workflow overview">
+      <div class="stat"><div class="stat-icon">⌁</div><div><div class="stat-label">MRI input modalities</div><div class="stat-value">T1ce · T2 · FLAIR</div></div></div>
+      <div class="stat"><div class="stat-icon">◎</div><div><div class="stat-label">Functional zones assessed</div><div class="stat-value">7 brain regions</div></div></div>
+      <div class="stat"><div class="stat-icon">↗️</div><div><div class="stat-label">Risk indicators</div><div class="stat-value">Overlap + distance</div></div></div>
+    </section>
+
+    <div class="section-heading">
+      <div><h2>Start a new analysis</h2><p>Upload the three MRI volumes for a case to begin processing.</p></div>
+      <span class="tag">NIfTI · .nii / .nii.gz</span>
+    </div>
+
+    <section class="panel">
+      <form id="upload-form">
+        <div class="form-grid">
+          <div class="field full">
+            <label for="case_name">Case name</label>
+            <input type="text" id="case_name" required placeholder="e.g. patient-001">
+            <div class="upload-help">Use a non-identifying research case label.</div>
+          </div>
+          <div class="field">
+            <label for="t1ce_file">T1ce scan</label>
+            <input class="file-input" type="file" id="t1ce_file" accept=".nii,.nii.gz" required>
+            <div class="upload-help">Contrast-enhanced T1-weighted MRI</div>
+          </div>
+          <div class="field">
+            <label for="t2_file">T2 scan</label>
+            <input class="file-input" type="file" id="t2_file" accept=".nii,.nii.gz" required>
+            <div class="upload-help">T2-weighted MRI volume</div>
+          </div>
+          <div class="field full">
+            <label for="flair_file">FLAIR scan</label>
+            <input class="file-input" type="file" id="flair_file" accept=".nii,.nii.gz" required>
+            <div class="upload-help">Fluid-attenuated inversion recovery volume</div>
+          </div>
+          <div class="field full">
+            <label for="seg_file">Segmentation <span class="optional-note">(optional)</span></label>
+            <input class="file-input" type="file" id="seg_file" accept=".nii,.nii.gz">
+            <div class="upload-help">Expert ground-truth mask (for example BraTS _seg.nii.gz). Used only to compute a Dice score against the model.</div>
+          </div>
+        </div>
+        <div class="form-footer">
+          <small>T1ce, T2 and FLAIR are required. The segmentation file is optional.</small>
+          <button class="primary-btn" id="upload-btn" type="submit">Upload &amp; Analyze <span class="btn-arrow">→</span></button>
+        </div>
+      </form>
+    </section>
+
+    <div id="status" role="status" aria-live="polite"></div>
+
+    <section id="result">
+      <div class="section-heading">
+        <div><h2>MRI image previews</h2><p>Axial slices from the uploaded volumes and available segmentation mask.</p></div>
+        <span class="tag">Uploaded scans</span>
+      </div>
+
+      <div class="preview-grid">
+        <article class="preview-card">
+          <h3>T1ce MRI</h3><p>Contrast-enhanced T1-weighted scan</p>
+          <div class="preview-image-wrap"><img id="preview-t1ce" alt="T1ce preview not loaded"></div>
+        </article>
+        <article class="preview-card">
+          <h3>T2 MRI</h3><p>T2-weighted scan</p>
+          <div class="preview-image-wrap"><img id="preview-t2" alt="T2 preview not loaded"></div>
+        </article>
+        <article class="preview-card">
+          <h3>FLAIR MRI</h3><p>Fluid-attenuated inversion recovery scan</p>
+          <div class="preview-image-wrap"><img id="preview-flair" alt="FLAIR preview not loaded"></div>
+        </article>
+        <article class="preview-card">
+          <h3>Segmentation overlay</h3><p>Available after the prediction mask is generated</p>
+          <div class="preview-image-wrap"><img id="preview-segmentation" alt="Segmentation preview not loaded"></div>
+        </article>
+      </div>
+
+      <div class="result-summary">
+        <div class="mini-label">Tumor overview</div>
+        <p id="tumor-summary">Waiting for inference…</p>
+        <p id="dice-summary" class="dice-line"></p>
+      </div>
+
+      <div class="section-heading">
+        <div><h2>Functional-region risk map</h2><p>Estimated overlap and distance for each region.</p></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Region</th><th>Function</th><th>Overlap %</th><th>Distance (mm)</th><th>Risk tier</th></tr>
+          </thead>
+          <tbody id="risk-table-body"></tbody>
+        </table>
+      </div>
+
+      <div class="section-heading">
+        <div><h2>Generated report</h2><p>Structured summary for research review.</p></div>
+      </div>
+      <pre id="report-text"></pre>
+    </section>
+
+    <div class="disclaimer">
+      <span class="disclaimer-icon">ⓘ</span>
+      <div><strong>Research and educational prototype.</strong>
+        This tool is not a medical device and is not validated for clinical or surgical use.
+        Anatomical region locations are approximate. Outputs must not be used to make patient-care decisions.
+      </div>
+    </div>
+    <div class="footer">NEURORISK LENS · BRAIN TUMOR SEGMENTATION &amp; SURGICAL RISK MAPPING</div>
+  </main>
+</div>
+
+<script>
+const API = ""; // Same origin
+
+const form = document.getElementById("upload-form");
+const statusEl = document.getElementById("status");
+const resultEl = document.getElementById("result");
+const uploadBtn = document.getElementById("upload-btn");
+const diceEl = document.getElementById("dice-summary");
+
+function setStatus(message) {
+  statusEl.textContent = message;
+}
+
+async function pollPrediction(caseId, attempts = 60) {
+  for (let i = 0; i < attempts; i++) {
+    const res = await fetch(`${API}/cases/${caseId}/prediction`);
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data) return data;
+    }
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    setStatus(`Running inference... (${i + 1}/${attempts})`);
+  }
+
+  throw new Error("Timed out waiting for prediction.");
+}
+
+function renderResult(prediction) {
+  const features =
+    (prediction.features && prediction.features.features) || [];
+
+  const wt = features.find(f => f.label === "whole_tumor");
+  const summary = document.getElementById("tumor-summary");
+
+  const regions = prediction.risk_regions || [];
+  const noTumor =
+    regions.length > 0 &&
+    regions.every(r => r.risk_tier === "No tumor detected");
+
+  if (noTumor) {
+    summary.textContent =
+      "No tumor detected by the model. This is not a clinical clearance: " +
+      "the model can miss tumors, so review the images manually.";
+  } else {
+    summary.textContent = wt
+      ? `Whole tumor volume: ${Math.round(wt.volume_mm3).toLocaleString()} mm³ (${wt.voxel_count.toLocaleString()} voxels)`
+      : "No tumor tissue detected.";
+  }
+
+  const tbody = document.getElementById("risk-table-body");
+  tbody.innerHTML = "";
+
+  (prediction.risk_regions || []).forEach(region => {
+    const tr = document.createElement("tr");
+
+    const values = [
+      region.region,
+      region.function,
+      `${region.overlap_pct}%`,
+      region.distance_mm === null ? "-" : region.distance_mm,
+      region.risk_tier
+    ];
+
+    values.forEach((value, index) => {
+      const td = document.createElement("td");
+      td.textContent = value ?? "-";
+
+      if (index === 4) {
+        td.className = `tier-${String(region.risk_tier).replace(/\s+/g, "-")}`;
+      }
+
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("report-text").textContent =
+    prediction.risk_report || "No report was returned.";
+
+  resultEl.style.display = "block";
+}
+
+async function renderDice(caseId) {
+  diceEl.style.display = "block";
+  diceEl.textContent = "Comparing with the uploaded segmentation…";
+
+  try {
+    const res = await fetch(`${API}/cases/${caseId}/dice`);
+    const body = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      diceEl.textContent =
+        "Dice score unavailable: " + (body.detail || `HTTP ${res.status}`);
+      return;
+    }
+
+    if (body.dice_whole_tumor === null || body.dice_whole_tumor === undefined) {
+      diceEl.textContent =
+        "Dice score unavailable: neither mask contains tumor voxels.";
+      return;
+    }
+
+    diceEl.textContent =
+      `Dice vs. uploaded segmentation (whole tumor): ${body.dice_whole_tumor.toFixed(3)} ` +
+      `(1.0 = perfect match; ${body.overlap_voxels.toLocaleString()} shared voxels)`;
+  } catch (error) {
+    diceEl.textContent = "Dice score unavailable: " + error.message;
+  }
+}
+
+function renderPreviews(caseId) {
+  for (const modality of ["t1ce", "t2", "flair", "segmentation"]) {
+    const img = document.getElementById(`preview-${modality}`);
+    if (!img) continue;
+
+    const url = `${API}/cases/${caseId}/preview/${modality}?v=${Date.now()}`;
+
+    img.onerror = async () => {
+      try {
+        const response = await fetch(url);
+        const message = await response.text();
+
+        img.alt = `${modality.toUpperCase()} preview unavailable`;
+        setStatus(
+          `${modality.toUpperCase()} preview failed (${response.status}): ${message}`
+        );
+      } catch (error) {
+        setStatus(`Cannot load ${modality} preview: ${error.message}`);
+      }
+    };
+
+    img.onload = () => {
+      setStatus(`${modality.toUpperCase()} preview loaded.`);
+    };
+
+    img.src = url;
+  }
+}
+
+form.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const t1ce = document.getElementById("t1ce_file").files[0];
+  const t2 = document.getElementById("t2_file").files[0];
+  const flair = document.getElementById("flair_file").files[0];
+  const seg = document.getElementById("seg_file").files[0];
+  const caseName = document.getElementById("case_name").value.trim();
+
+  if (!t1ce || !t2 || !flair || !caseName) {
+    setStatus("Enter a case name and select the T1ce, T2 and FLAIR files.");
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append("case_name", caseName);
+  fd.append("t1ce_file", t1ce);
+  fd.append("t2_file", t2);
+  fd.append("flair_file", flair);
+  if (seg) {
+    fd.append("seg_file", seg);
+  }
+
+  uploadBtn.disabled = true;
+  resultEl.style.display = "block";
+  document.getElementById("tumor-summary").textContent =
+    "Waiting for inference…";
+  diceEl.style.display = "none";
+  diceEl.textContent = "";
+  document.getElementById("risk-table-body").innerHTML = "";
+  document.getElementById("report-text").textContent = "";
+
+  try {
+    setStatus("Uploading MRI files...");
+
+    const createRes = await fetch(`${API}/cases/`, {
+      method: "POST",
+      body: fd
+    });
+
+    if (!createRes.ok) {
+      throw new Error(await createRes.text());
+    }
+
+    const caseData = await createRes.json();
+
+    // Load uploaded MRI previews before waiting for inference.
+    setStatus("Generating MRI previews...");
+    renderPreviews(caseData.id);
+
+    setStatus("Running inference...");
+
+    const predictRes = await fetch(
+      `${API}/cases/${caseData.id}/predict`,
+      { method: "POST" }
+    );
+
+    if (!predictRes.ok) {
+      throw new Error(await predictRes.text());
+    }
+
+    const prediction = await pollPrediction(caseData.id);
+
+    renderResult(prediction);
+
+    // Retry the segmentation preview after inference finishes.
+    const segmentationImage = document.getElementById("preview-segmentation");
+    segmentationImage.src =
+      `${API}/cases/${caseData.id}/preview/segmentation?v=${Date.now()}`;
+
+    if (seg) {
+      await renderDice(caseData.id);
+    }
+
+    setStatus("Analysis complete.");
+    resultEl.scrollIntoView({ behavior:"smooth", block:"start" });
+
+  } catch (error) {
+    setStatus("Error: " + error.message);
+  } finally {
+    uploadBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

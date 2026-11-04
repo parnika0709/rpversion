@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "brain-tumor-mri-workspace"
+version = "0.1.0"
+description = "Brain Tumor MRI Analysis — monorepo workspace (research prototype)"
+requires-python = ">=3.10"
+readme = "README.md"
+license = { text = "MIT (research/educational prototype)" }
+
+# Workspace members are installed with `pip install -e ...` individually.
+# This root pyproject only declares dev tooling shared across packages.
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["braintumor*"]
+exclude = ["apps*", "data*", "tests*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "W", "RUF"]
+ignore = ["E501", "B008"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+[tool.pytest.ini_options]
+testpaths = ["packages/ml/tests", "apps/api/tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "slow: marks tests as slow",
+    "gpu: marks tests requiring a GPU",
+    "integration: marks integration tests",
+]
