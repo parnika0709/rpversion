@@ -1,4 +1,4 @@
-﻿
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -631,9 +631,17 @@ footer {
         </div>
 
         <div class="field">
+          <label for="model_select">Segmentation Architecture</label>
+          <select id="model_select" style="width:100%;padding:13px;background:#0b1424;border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:13px;cursor:pointer;">
+            <option value="attn_unet_2d" selected>2D Attention U-Net (Baseline — Default)</option>
+            <option value="unet_3d">3D Volumetric U-Net (Experimental)</option>
+          </select>
+        </div>
+
+        <div class="field" style="grid-column: 1 / -1;">
           <label>Supported Format</label>
           <div style="padding:13px;background:#0b1424;border:1px solid var(--border);border-radius:9px;color:var(--muted);font-size:12px;">
-            NIfTI medical imaging Â· .nii / .nii.gz
+            NIfTI medical imaging Â· .nii / .nii.gz (Requires T1CE, T2, and FLAIR modalities)
           </div>
         </div>
 
@@ -673,8 +681,11 @@ footer {
 
   <section id="result">
 
-    <div class="result-banner">
-      âœ“ Analysis response received
+    <div class="result-banner" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+      <span id="result-status-text">âœ“ Analysis response received</span>
+      <span id="model-badge" style="background:#17243a;border:1px solid #344767;padding:4px 10px;border-radius:6px;font-weight:600;font-size:11px;letter-spacing:0.3px;color:var(--cyan);">
+        Model: 2D Attention U-Net (Baseline — Default)
+      </span>
     </div>
 
     <h2 class="section-heading">Analysis Results</h2>
@@ -825,6 +836,22 @@ function renderResult(prediction) {
   document.getElementById("report-text").textContent =
     prediction.risk_report || "No report was returned.";
 
+  const modelName = prediction.model_name || "attn_unet_2d";
+  const modelBadge = document.getElementById("model-badge");
+  if (modelBadge) {
+    if (modelName === "unet_3d") {
+      modelBadge.textContent = "Model: 3D Volumetric U-Net (Experimental)";
+      modelBadge.style.color = "#ffc477";
+      modelBadge.style.borderColor = "#6d4a25";
+      modelBadge.style.background = "#2a1e12";
+    } else {
+      modelBadge.textContent = "Model: 2D Attention U-Net (Baseline — Default)";
+      modelBadge.style.color = "var(--cyan)";
+      modelBadge.style.borderColor = "#344767";
+      modelBadge.style.background = "#17243a";
+    }
+  }
+
 document.querySelector(".result-grid").style.display = "grid";
 document.querySelector(".report-card").style.display = "block";
 
@@ -871,10 +898,15 @@ form.addEventListener("submit", async event => {
 
     const caseData = await createRes.json();
 
-    setStatus("MRI uploaded. Starting AI inference...");
+    const modelSelect = document.getElementById("model_select");
+    const selectedModel = modelSelect ? modelSelect.value : "attn_unet_2d";
 
-    const predictRes = await fetch(`${API}/cases/${caseData.id}/predict`, {
-      method: "POST"
+    setStatus(`MRI uploaded. Starting AI inference with ${selectedModel === "unet_3d" ? "3D Volumetric U-Net (Experimental)" : "2D Attention U-Net (Baseline)"}...`);
+
+    const predictRes = await fetch(`${API}/cases/${caseData.id}/predict?model_name=${encodeURIComponent(selectedModel)}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model_name: selectedModel })
     });
 
     if (!predictRes.ok) {
@@ -899,9 +931,3 @@ form.addEventListener("submit", async event => {
 </script>
 </body>
 </html>
-
-
-
-
-
-

@@ -24,15 +24,71 @@ if "attn_unet_2d" not in registry.list_names():
 
     registry.register("attn_unet_2d", build_attn_unet_2d)
 
+if "unet_3d" not in registry.list_names():
+    from braintumor.models.unet_3d import build_unet_3d
+
+    registry.register("unet_3d", build_unet_3d)
+
+
+SUPPORTED_MODELS: tuple[str, ...] = ("attn_unet_2d", "unet_3d")
+
 
 class InferenceService:
     def __init__(self):
-        self.predictor = registry.get(settings.active_predictor)
+        self._predictors: dict[str, Any] = {}
 
-        weights_path = settings.model_weights_path or Path("runs/exp/best.pt")
+    @property
+    def predictor(self):
+        """Backward-compatible default predictor property."""
+        return self.get_predictor(settings.active_predictor)
 
-        if weights_path.exists():
-            self.predictor.load_weights(weights_path)
+    def get_predictor(self, model_name: str | None = None) -> Any:
+        """Resolve and load the requested model with its independent checkpoint.
+
+        Parameters
+        ----------
+        model_name : str, optional
+            'attn_unet_2d' or 'unet_3d'. Defaults to settings.active_predictor ('attn_unet_2d').
+
+        Returns
+        -------
+        Predictor instance loaded with its dedicated weights.
+
+        Raises
+        ------
+        ValueError: If model_name is unsupported.
+        FileNotFoundError: If the requested checkpoint does not exist (no silent fallback).
+        """
+        name = model_name or settings.active_predictor
+        if name not in SUPPORTED_MODELS:
+            raise ValueError(
+                f"Unsupported model_name '{name}'. Supported models: {list(SUPPORTED_MODELS)}"
+            )
+
+        if name in self._predictors:
+            return self._predictors[name]
+
+        predictor = registry.get(name)
+
+        if name == "attn_unet_2d":
+            weights_path = settings.model_weights_path or Path("runs/exp/best.pt")
+        elif name == "unet_3d":
+            weights_path = (
+                getattr(settings, "model_weights_path_3d", None)
+                or (Path("runs/exp_3d_v2/best.pt") if Path("runs/exp_3d_v2/best.pt").exists() else Path("runs/exp_3d/best.pt"))
+            )
+        else:
+            raise ValueError(f"Unknown model: {name}")
+
+        if not weights_path.exists():
+            raise FileNotFoundError(
+                f"Checkpoint for model '{name}' not found at {weights_path}. "
+                "Ensure the model checkpoint exists before triggering inference."
+            )
+
+        predictor.load_weights(weights_path)
+        self._predictors[name] = predictor
+        return predictor
 
     def _load_volume_from_dir(self, case_dir: Path) -> VolumeInput:
         """Load and preprocess MRI modalities using validation transforms.
@@ -179,13 +235,20 @@ class InferenceService:
 
         nib.save(image, str(path))
 
-    def run_inference(self, case_id: int, case_dir: Path) -> Prediction:
+    def run_inference(
+        self,
+        case_id: int,
+        case_dir: Path,
+        model_name: str | None = None,
+    ) -> Prediction:
+        predictor = self.get_predictor(model_name)
+
         # 1. Load and preprocess MRI.
         volume = self._load_volume_from_dir(case_dir)
 
         # 2. Run segmentation, postprocessing and feature extraction.
         pipeline_output = run_pipeline(
-            self.predictor,
+            predictor,
             volume,
             postprocess_mask=True,
             compute_uncertainty=False,
@@ -272,8 +335,8 @@ class InferenceService:
         with get_session() as session:
             prediction = Prediction(
                 case_id=case_id,
-                model_name=self.predictor.name,
-                model_version=self.predictor.version,
+                model_name=predictor.name,
+                model_version=predictor.version,
                 inference_seconds=output.meta.inference_seconds,
                 mask_path=str(mask_path),
                 uncertainty_path=(

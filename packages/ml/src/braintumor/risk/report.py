@@ -68,9 +68,45 @@ def _fmt_distance(distance_mm: float | None) -> str:
     return "n/a" if distance_mm is None else f"{distance_mm} mm"
 
 
+def _failed_registration_report(case_name: str) -> str:
+    return "\n".join(
+        [
+            f"Experimental Region Proximity Analysis Report — {case_name}",
+            "",
+            "Status: ANATOMICAL MAPPING FAILED — Atlas registration or affine transform error.",
+            "Registration between the patient scan and the atlas could not be computed.",
+            "To prevent false reassurance, no risk tiers were assigned, and regions were not given a minimal score.",
+            "",
+            "Manual neuroradiological inspection and dedicated clinical image registration are required.",
+            "",
+            DISCLAIMER,
+        ]
+    )
+
+
+def _invalid_segmentation_report(case_name: str) -> str:
+    return "\n".join(
+        [
+            f"Experimental Region Proximity Analysis Report — {case_name}",
+            "",
+            "Status: INVALID SEGMENTATION INPUT — Mask contains invalid labels or non-finite values.",
+            "Anatomical risk mapping cannot proceed with an invalid segmentation input.",
+            "No risk tiers were assigned.",
+            "",
+            DISCLAIMER,
+        ]
+    )
+
+
 def _template_report(case_name: str, regions: list[RiskRegion], tumor_volume_mm3: float | None) -> str:
     if _is_no_tumor(regions):
         return _no_tumor_report(case_name)
+
+    if any(getattr(r, "mapping_status", "") == "FAILED_REGISTRATION" for r in regions):
+        return _failed_registration_report(case_name)
+
+    if any(getattr(r, "mapping_status", "") == "INVALID_SEGMENTATION" for r in regions):
+        return _invalid_segmentation_report(case_name)
 
     lines = [f"Experimental Region Proximity Analysis Report — {case_name}", ""]
 
@@ -97,7 +133,7 @@ def _template_report(case_name: str, regions: list[RiskRegion], tumor_volume_mm3
 
     lines.append(
         "Summary: this experimental analysis estimates overlap and proximity "
-        "using simplified region boxes. These estimates do not establish "
+        "using the Harvard-Oxford atlas in standard MNI152 space. These estimates do not establish "
         "actual anatomical involvement, neurological deficits, or surgical risk."
     )
 
@@ -113,6 +149,7 @@ def _template_report(case_name: str, regions: list[RiskRegion], tumor_volume_mm3
 def _numbers_in(text: str, case_name: str) -> list[float]:
     cleaned = text.replace(DISCLAIMER, " ").replace(case_name, " ")
     cleaned = re.sub(r"mm\^3|mm³|mm3", "mm", cleaned)
+    cleaned = re.sub(r"MNI-?152", "MNI", cleaned, flags=re.IGNORECASE)
     return [float(m.replace(",", "")) for m in _NUMBER_RE.findall(cleaned)]
 
 
@@ -130,6 +167,14 @@ def _allowed_numbers(
     for r in regions:
         add(r.overlap_pct)
         add(r.distance_mm)
+        add(r.region_overlap_pct)
+        add(r.overlap_volume_mm3)
+        add(r.region_volume_mm3)
+        add(r.tumor_volume_mm3)
+        if r.overlap_volume_mm3:
+            add(round(r.overlap_volume_mm3))
+        if r.region_volume_mm3:
+            add(round(r.region_volume_mm3))
 
     if tumor_volume_mm3 is not None:
         add(tumor_volume_mm3)
@@ -173,6 +218,15 @@ def verify_report_numbers(
     for pattern in _FORBIDDEN_PATTERNS:
         if re.search(pattern, lowered):
             problems.append(f"forbidden wording: '{pattern}'")
+
+    for r in regions:
+        for other_tier in _TIER_ORDER:
+            if other_tier != r.risk_tier and r.risk_tier in _TIER_ORDER:
+                pattern = rf"\b{re.escape(r.region)}\b[^\n\.\;]*?\b{other_tier}\b"
+                if re.search(pattern, text, re.IGNORECASE):
+                    problems.append(
+                        f"contradictory risk tier for {r.region}: mentioned {other_tier}, expected {r.risk_tier}"
+                    )
 
     return problems
 

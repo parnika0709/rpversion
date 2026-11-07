@@ -45,7 +45,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from scipy.ndimage import affine_transform, distance_transform_edt
+from scipy.ndimage import affine_transform, binary_erosion, distance_transform_edt
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +61,8 @@ class MappingStatus(str, Enum):
 
     SUCCESS = "SUCCESS"
     NO_TUMOR_DETECTED = "NO_TUMOR_DETECTED"
+    LOW_RISK_DETECTED = "LOW_RISK_DETECTED"
+    INVALID_SEGMENTATION = "INVALID_SEGMENTATION"
     FAILED_MISSING_ATLAS = "FAILED_MISSING_ATLAS"
     FAILED_INVALID_AFFINE = "FAILED_INVALID_AFFINE"
     FAILED_INCOMPATIBLE_DIMENSIONS = "FAILED_INCOMPATIBLE_DIMENSIONS"
@@ -503,12 +505,36 @@ def resample_mask_to_atlas(
     return resampled > 0
 
 
-def _distance_mm(
+def surface_to_surface_distance_mm(
     tumor_atlas_mask: np.ndarray,
     region_atlas_mask: np.ndarray,
     atlas_spacing: tuple[float, float, float],
+    method: str = "edt",
 ) -> float:
-    """Compute the minimum Euclidean distance in true millimeters from tumor to anatomical region."""
+    """Compute the physically meaningful surface-to-surface distance in true millimeters.
+
+    Parameters
+    ----------
+    tumor_atlas_mask : np.ndarray
+        Boolean 3D mask of the tumor in atlas space.
+    region_atlas_mask : np.ndarray
+        Boolean 3D mask of the anatomical target region in atlas space.
+    atlas_spacing : tuple of float
+        Voxel dimensions (dx, dy, dz) in millimeters.
+    method : str
+        Algorithm used to compute distance:
+        - 'edt' (default): Exact Euclidean Distance Transform computed over the
+          complement of the region mask sampled with physical voxel spacing.
+          Fast O(N) evaluation yielding true minimum Euclidean distance to region surface.
+        - 'boundary_coords': Extracts boundary surface voxels via morphological
+          erosion (mask ^ binary_erosion(mask)), projects coordinates into physical mm,
+          and calculates exact minimum pairwise Euclidean distance.
+
+    Returns
+    -------
+    float
+        Distance in millimeters (0.0 if overlapping, inf if either mask is empty).
+    """
     if not tumor_atlas_mask.any() or not region_atlas_mask.any():
         return float("inf")
 
@@ -516,11 +542,57 @@ def _distance_mm(
     if np.logical_and(tumor_atlas_mask, region_atlas_mask).any():
         return 0.0
 
+    if method == "boundary_coords":
+        # Extract boundary surface voxels
+        t_bound = tumor_atlas_mask ^ binary_erosion(tumor_atlas_mask)
+        r_bound = region_atlas_mask ^ binary_erosion(region_atlas_mask)
+
+        # Fallback to full masks if degenerate 1-voxel mask has empty eroded boundary
+        t_coords = np.argwhere(t_bound if t_bound.any() else tumor_atlas_mask)
+        r_coords = np.argwhere(r_bound if r_bound.any() else region_atlas_mask)
+
+        t_mm = t_coords * np.asarray(atlas_spacing)
+        r_mm = r_coords * np.asarray(atlas_spacing)
+
+        # Subsample if surface has a very large number of voxels
+        max_pts = 10_000
+        if len(t_mm) > max_pts:
+            idx = np.random.default_rng(42).choice(len(t_mm), size=max_pts, replace=False)
+            t_mm = t_mm[idx]
+
+        min_dist = float("inf")
+        # Chunked pairwise computation to maintain memory efficiency
+        chunk_size = 1000
+        for start in range(0, len(t_mm), chunk_size):
+            end = min(start + chunk_size, len(t_mm))
+            diff = t_mm[start:end, None, :] - r_mm[None, :, :]
+            dists = np.sqrt((diff ** 2).sum(axis=-1))
+            chunk_min = float(dists.min())
+            if chunk_min < min_dist:
+                min_dist = chunk_min
+
+        return min_dist
+
+    # Default: EDT method
     distance_map = distance_transform_edt(
         ~region_atlas_mask,
         sampling=atlas_spacing,
     )
     return float(distance_map[tumor_atlas_mask].min())
+
+
+def _distance_mm(
+    tumor_atlas_mask: np.ndarray,
+    region_atlas_mask: np.ndarray,
+    atlas_spacing: tuple[float, float, float],
+) -> float:
+    """Compute minimum Euclidean distance in true millimeters from tumor to anatomical region."""
+    return surface_to_surface_distance_mm(
+        tumor_atlas_mask=tumor_atlas_mask,
+        region_atlas_mask=region_atlas_mask,
+        atlas_spacing=atlas_spacing,
+        method="edt",
+    )
 
 
 def _risk_tier(

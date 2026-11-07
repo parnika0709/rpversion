@@ -1,4 +1,4 @@
-﻿
+
 """Full-volume evaluation of the BraTS 2D segmentation model."""
 
 from __future__ import annotations
@@ -201,11 +201,21 @@ def main():
             f"Checkpoint not found: {checkpoint_path}"
         )
 
-    checkpoint = torch.load(
-        checkpoint_path,
-        map_location=device,
-        weights_only=False,
-    )
+    import pathlib
+    import sys
+    orig_windows_path = getattr(pathlib, "WindowsPath", None)
+    if sys.platform != "win32" and orig_windows_path is not None:
+        pathlib.WindowsPath = pathlib.PosixPath  # type: ignore[misc,assignment]
+
+    try:
+        checkpoint = torch.load(
+            checkpoint_path,
+            map_location=device,
+            weights_only=False,
+        )
+    finally:
+        if orig_windows_path is not None:
+            pathlib.WindowsPath = orig_windows_path  # type: ignore[misc]
 
     state_dict = checkpoint.get("state_dict", checkpoint)
     model.load_state_dict(state_dict, strict=True)

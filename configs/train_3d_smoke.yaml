@@ -1,0 +1,53 @@
+# Remote GPU Smoke-Test Configuration for Volumetric 3D U-Net
+# Fast 2-epoch execution to verify GPU pipeline, AMP, multi-level checkpoints and Unet3DPredictor loading.
+# Target output directory: runs/exp_3d_smoke/ (isolated from all prior experiments).
+
+model:
+  name: "unet_3d"
+  in_channels: 3               # T1CE, T2, FLAIR
+  out_channels: 4              # 0: BG, 1: NCR/NET, 2: ED, 3: ET
+  channels: [32, 64, 128, 256] # Full clinical 3D U-Net capacity
+  strides: [2, 2, 2]
+  num_res_units: 2
+  dropout: 0.2
+
+data:
+  data_root: "data/BraTS2021_Training_Data"
+  split_file: "data/splits/patients_split.json"
+  patch_size: [64, 64, 64]     # Fast lightweight patch resolution for smoke test
+  samples_per_volume: 2
+  num_workers: 2
+  pin_memory: true
+  pos_ratio: 1.0
+  neg_ratio: 1.0
+
+training:
+  epochs: 2
+  batch_size: 1
+  gradient_accumulation_steps: 1
+  learning_rate: 2.0e-4
+  min_lr: 1.0e-6
+  weight_decay: 1.0e-5
+  scheduler: "cosine"
+  mixed_precision: true
+  patience: 5
+  seed: 42
+  save_dir: "runs/exp_3d_smoke"
+  resume: null
+  val_sliding_window: false
+  val_interval_epochs: 1
+
+loss:
+  type: "ClassWeightedDiceCELoss"
+  dice_weight: 0.5
+  ce_weight: 0.5
+  include_background: false
+  ce_class_weights: [1.0, 2.0, 1.5, 2.0]
+  dice_class_weights: [1.5, 1.0, 1.5]
+
+inference:
+  roi_size: [64, 64, 64]
+  sw_batch_size: 2
+  overlap: 0.25
+  mode: "gaussian"
+  apply_brain_mask: true

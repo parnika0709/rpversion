@@ -85,6 +85,35 @@ def test_verifier_requires_disclaimer_and_blocks_recommendations():
     assert any("forbidden" in p for p in rep.verify_report_numbers(text, "case_1", regions, None))
 
 
+def test_verifier_rejects_contradictory_risk_tiers():
+    """Verify that verifier flags an LLM report claiming a Low risk region is High risk."""
+    regions = [RiskRegion("motor cortex left", "voluntary movement", 0.0, 35.0, "Low")]
+    # Report text contradicts structured tier
+    bad_text = "Findings: motor cortex left is at High risk. " + rep.DISCLAIMER
+    problems = rep.verify_report_numbers(bad_text, "case_1", regions, None)
+    assert any("contradictory risk tier" in p for p in problems)
+
+
+def test_failed_registration_and_invalid_segmentation_reports():
+    """Verify explicit reports for registration failure and invalid segmentation."""
+    reg_failed_region = RiskRegion(
+        "motor cortex left", "f", 0.0, None, "Mapping failed", mapping_status="FAILED_REGISTRATION"
+    )
+    text_reg = rep.build_report_text("case_error", [reg_failed_region], None)
+    assert "ANATOMICAL MAPPING FAILED" in text_reg
+    assert "Low" not in text_reg and "Moderate" not in text_reg and "High" not in text_reg
+    assert rep.DISCLAIMER in text_reg
+
+    inv_seg_region = RiskRegion(
+        "motor cortex left", "f", 0.0, None, "Invalid segmentation", mapping_status="INVALID_SEGMENTATION"
+    )
+    text_inv = rep.build_report_text("case_error", [inv_seg_region], None)
+    assert "INVALID SEGMENTATION INPUT" in text_inv
+    assert "Low" not in text_inv and "Moderate" not in text_inv and "High" not in text_inv
+    assert rep.DISCLAIMER in text_inv
+
+
+
 @pytest.mark.skipif(not os.getenv("ANTHROPIC_API_KEY"), reason="needs ANTHROPIC_API_KEY")
 def test_llm_reports_are_verified():
     rng = random.Random(2)

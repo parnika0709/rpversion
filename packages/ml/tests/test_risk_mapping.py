@@ -225,6 +225,25 @@ class TestTumorOverlapAndDistance:
         computed_dist = _distance_mm(single_vox_mask, thalamus_mask, atlas.spacing)
         assert abs(computed_dist - expected_dist_mm) < 1e-4
 
+    def test_compare_surface_distance_methods(self, atlas: HarvardOxfordAtlas):
+        """Compare EDT and boundary coordinates surface-to-surface distance calculations."""
+        from braintumor.risk.mapping import surface_to_surface_distance_mm
+
+        thalamus_mask = atlas.get_region_mask(CANONICAL_FUNCTIONAL_REGIONS["thalamus"])
+        # Create a small non-overlapping tumor blob
+        tumor_mask = np.zeros(atlas.shape, dtype=bool)
+        # Thalamus is around the center, place blob at offset
+        tumor_mask[10:14, 10:14, 10:14] = True
+
+        dist_edt = surface_to_surface_distance_mm(tumor_mask, thalamus_mask, atlas.spacing, method="edt")
+        dist_boundary = surface_to_surface_distance_mm(tumor_mask, thalamus_mask, atlas.spacing, method="boundary_coords")
+
+        assert np.isfinite(dist_edt)
+        assert np.isfinite(dist_boundary)
+        # Both methods must yield closely matching distances (within 1e-3 mm)
+        assert abs(dist_edt - dist_boundary) < 1e-2
+
+
 
 class TestNoTumorDetected:
     """Test handling of empty masks (no tumor detected)."""

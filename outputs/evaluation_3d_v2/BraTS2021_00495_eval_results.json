@@ -1,0 +1,225 @@
+{
+  "case_id": "BraTS2021_00495",
+  "input_shape": [
+    240,
+    240,
+    155
+  ],
+  "spacing_mm": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "inference_seconds": 9.381758541916497,
+  "tumor_voxels_raw": 6294496,
+  "tumor_voxels_postprocessed": 2894756,
+  "raw_metrics": {
+    "regions": {
+      "WT": {
+        "dice": 0.023027627710478185,
+        "iou": 0.011647925905919466,
+        "sensitivity": 0.741344585204729,
+        "recall": 0.741344585204729,
+        "specificity": 0.29537979439323897,
+        "precision": 0.011695455839514394,
+        "hausdorff95_mm": 149.24737784652646
+      },
+      "TC": {
+        "dice": 0.013550954192592167,
+        "iou": 0.006821697350451934,
+        "sensitivity": 0.5698798599943241,
+        "recall": 0.5698798599943241,
+        "specificity": 0.5084457775056069,
+        "precision": 0.00685700210529383,
+        "hausdorff95_mm": 161.5379985424475
+      },
+      "ET": {
+        "dice": 0.0067869984614391705,
+        "iou": 0.0034050542797986402,
+        "sensitivity": 0.23462414578587698,
+        "recall": 0.23462414578587698,
+        "specificity": 0.755378541231052,
+        "precision": 0.0034433016128884533,
+        "hausdorff95_mm": 170.44170308328307
+      }
+    },
+    "classes": {
+      "NCR_NET": {
+        "dice": 0.005269332395765878,
+        "iou": 0.002641626000614206,
+        "sensitivity": 0.2823433294886582,
+        "recall": 0.2823433294886582,
+        "specificity": 0.7526492075168022,
+        "precision": 0.002659482969350081,
+        "hausdorff95_mm": 167.67879955058947
+      },
+      "EDEMA": {
+        "dice": 0.009008283000728362,
+        "iou": 0.004524520581283592,
+        "sensitivity": 0.1889250113032058,
+        "recall": 0.1889250113032058,
+        "specificity": 0.7868632884361553,
+        "precision": 0.00461414689550732,
+        "hausdorff95_mm": 145.8782007819783
+      },
+      "ET": {
+        "dice": 0.0067869984614391705,
+        "iou": 0.0034050542797986402,
+        "sensitivity": 0.23462414578587698,
+        "recall": 0.23462414578587698,
+        "specificity": 0.755378541231052,
+        "precision": 0.0034433016128884533,
+        "hausdorff95_mm": 170.44170308328307
+      }
+    }
+  },
+  "postprocessed_metrics": {
+    "regions": {
+      "WT": {
+        "dice": 0.024183232255353772,
+        "iou": 0.012239612827538875,
+        "sensitivity": 0.36457473162675474,
+        "recall": 0.36457473162675474,
+        "specificity": 0.6762203215015397,
+        "precision": 0.01250640813940795,
+        "hausdorff95_mm": 148.84904413775376
+      },
+      "TC": {
+        "dice": 0.014566385278218923,
+        "iou": 0.0073366267047211805,
+        "sensitivity": 0.31461545738340746,
+        "recall": 0.31461545738340746,
+        "specificity": 0.750571061092523,
+        "precision": 0.007455790511521301,
+        "hausdorff95_mm": 163.71392505363153
+      },
+      "ET": {
+        "dice": 0.005437828714721486,
+        "iou": 0.002726327007002943,
+        "sensitivity": 0.06705775891659126,
+        "recall": 0.06705775891659126,
+        "specificity": 0.9149958413674173,
+        "precision": 0.002833813767403098,
+        "hausdorff95_mm": 165.70691812107688
+      }
+    },
+    "classes": {
+      "NCR_NET": {
+        "dice": 0.005306759788399485,
+        "iou": 0.0026604390496839177,
+        "sensitivity": 0.190359477124183,
+        "recall": 0.190359477124183,
+        "specificity": 0.8351844217571598,
+        "precision": 0.0026908875988872322,
+        "hausdorff95_mm": 165.49199374088283
+      },
+      "EDEMA": {
+        "dice": 0.007106924609203552,
+        "iou": 0.0035661344288679007,
+        "sensitivity": 0.05438456735634164,
+        "recall": 0.05438456735634164,
+        "specificity": 0.9254766593184773,
+        "precision": 0.0038018750498563384,
+        "hausdorff95_mm": 145.0051721267609
+      },
+      "ET": {
+        "dice": 0.005437828714721486,
+        "iou": 0.002726327007002943,
+        "sensitivity": 0.06705775891659126,
+        "recall": 0.06705775891659126,
+        "specificity": 0.9149958413674173,
+        "precision": 0.002833813767403098,
+        "hausdorff95_mm": 165.70691812107688
+      }
+    }
+  },
+  "volume_analysis": {
+    "gt_tumor_voxels": 99302,
+    "pred_tumor_voxels": 2894756,
+    "tp_voxels": 36203,
+    "fp_voxels": 2858553,
+    "fn_voxels": 63099,
+    "gt_volume_mm3": 99302.0,
+    "pred_volume_mm3": 2894756.0
+  },
+  "anatomical_risk_mapping": [
+    {
+      "region": "motor cortex left",
+      "function": "controls voluntary movement of the right side of the body",
+      "risk_tier": "High",
+      "overlap_pct": 0.9,
+      "region_overlap_pct": 5.79,
+      "distance_mm": 0.0,
+      "overlap_volume_mm3": 2024.0,
+      "region_volume_mm3": 34944.0,
+      "mapping_status": "SUCCESS"
+    },
+    {
+      "region": "broca area",
+      "function": "speech production (language expression)",
+      "risk_tier": "High",
+      "overlap_pct": 1.1,
+      "region_overlap_pct": 23.88,
+      "distance_mm": 0.0,
+      "overlap_volume_mm3": 2552.0,
+      "region_volume_mm3": 10688.0,
+      "mapping_status": "SUCCESS"
+    },
+    {
+      "region": "thalamus",
+      "function": "sensory relay and consciousness regulation",
+      "risk_tier": "Moderate",
+      "overlap_pct": 0.0,
+      "region_overlap_pct": 0.0,
+      "distance_mm": 2.0,
+      "overlap_volume_mm3": 0.0,
+      "region_volume_mm3": 20832.0,
+      "mapping_status": "SUCCESS"
+    },
+    {
+      "region": "wernicke area",
+      "function": "language comprehension",
+      "risk_tier": "Low",
+      "overlap_pct": 0.0,
+      "region_overlap_pct": 0.0,
+      "distance_mm": 10.4,
+      "overlap_volume_mm3": 0.0,
+      "region_volume_mm3": 18864.0,
+      "mapping_status": "SUCCESS"
+    },
+    {
+      "region": "motor cortex right",
+      "function": "controls voluntary movement of the left side of the body",
+      "risk_tier": "Low",
+      "overlap_pct": 0.0,
+      "region_overlap_pct": 0.0,
+      "distance_mm": 15.2,
+      "overlap_volume_mm3": 0.0,
+      "region_volume_mm3": 33192.0,
+      "mapping_status": "SUCCESS"
+    },
+    {
+      "region": "brainstem",
+      "function": "controls vital functions (breathing, heart rate, consciousness)",
+      "risk_tier": "Low",
+      "overlap_pct": 0.0,
+      "region_overlap_pct": 0.0,
+      "distance_mm": 25.1,
+      "overlap_volume_mm3": 0.0,
+      "region_volume_mm3": 39120.0,
+      "mapping_status": "SUCCESS"
+    },
+    {
+      "region": "visual cortex",
+      "function": "visual processing",
+      "risk_tier": "Low",
+      "overlap_pct": 0.0,
+      "region_overlap_pct": 0.0,
+      "distance_mm": 61.2,
+      "overlap_volume_mm3": 0.0,
+      "region_volume_mm3": 54016.0,
+      "mapping_status": "SUCCESS"
+    }
+  ],
+  "report_text": "Experimental Region Proximity Analysis Report \u2014 BraTS2021_00495\n\nWhole tumor volume: 2,894,756 mm^3\n\nHeuristic tiers across 7 approximate regions: 2 High, 1 Moderate, 4 Low.\n\nRegion findings:\n- motor cortex left: High; overlap 0.9% of tumor, distance 0.0 mm\n- broca area: High; overlap 1.1% of tumor, distance 0.0 mm\n- thalamus: Moderate; overlap 0.0% of tumor, distance 2.0 mm\n- wernicke area: Low; overlap 0.0% of tumor, distance 10.4 mm\n- motor cortex right: Low; overlap 0.0% of tumor, distance 15.2 mm\n- brainstem: Low; overlap 0.0% of tumor, distance 25.1 mm\n- visual cortex: Low; overlap 0.0% of tumor, distance 61.2 mm\n\nSummary: this experimental analysis estimates overlap and proximity using the Harvard-Oxford atlas in standard MNI152 space. These estimates do not establish actual anatomical involvement, neurological deficits, or surgical risk.\n\nThis report is generated by a research/educational prototype. Region locations are approximate (heuristic, not a validated brain atlas). This is NOT a medical device and must NOT be used for real surgical planning or clinical decisions. Always consult a qualified radiologist or neurosurgeon."
+}

@@ -38,3 +38,32 @@ def test_transforms_output_shape():
     assert train_tf is not None
     assert val_tf is not None
 
+
+def test_evaluation_normalization_consistency():
+    """Verify that evaluation numpy normalization matches MONAI's non-zero z-score logic."""
+    from monai.transforms import NormalizeIntensity
+
+    np.random.seed(42)
+    # Simulate a brain volume with foreground and air background (zeros)
+    raw = np.random.uniform(10.0, 100.0, (1, 32, 32, 32)).astype(np.float32)
+    raw[:, :10, :, :] = 0.0  # Background air
+
+    # Evaluation logic
+    p1, p99 = np.percentile(raw[0], (1.0, 99.0))
+    scaled = np.clip(raw[0], p1, p99)
+    scaled = (scaled - p1) / (p99 - p1)
+    mask = scaled > 0
+    mean = scaled[mask].mean()
+    std = scaled[mask].std() + 1e-8
+    eval_normalized = scaled.copy()
+    eval_normalized[mask] = (eval_normalized[mask] - mean) / std
+    eval_normalized[~mask] = 0.0
+
+    # MONAI logic
+    monai_norm = NormalizeIntensity(nonzero=True, channel_wise=True)
+    monai_output = monai_norm(scaled[np.newaxis, ...])[0]
+
+    np.testing.assert_allclose(eval_normalized, monai_output, atol=1e-5)
+    # Ensure background air remains exactly 0.0
+    assert (eval_normalized[~mask] == 0.0).all()
+

@@ -21,6 +21,9 @@ class Settings:
     model_weights_path: Path | None = (
         Path(os.getenv("BT_WEIGHTS_PATH")) if os.getenv("BT_WEIGHTS_PATH") else None
     )
+    model_weights_path_3d: Path | None = (
+        Path(os.getenv("BT_WEIGHTS_PATH_3D")) if os.getenv("BT_WEIGHTS_PATH_3D") else None
+    )
 
     max_upload_mb: int = int(os.getenv("BT_MAX_UPLOAD_MB", "500"))
     upload_purge_days: int = int(os.getenv("BT_UPLOAD_PURGE_DAYS", "7"))
